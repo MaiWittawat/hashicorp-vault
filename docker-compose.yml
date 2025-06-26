@@ -1,0 +1,28 @@
+services:
+  vault: 
+    image: hashicorp/vault:latest
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: wittawat
+    cap_add:
+      - IPC_LOCK # for dev we didn't use this field
+    command: "server -dev -dev-listen-address='0.0.0.0:8200' -dev-root-token-id='wittawat'"
+    volumes:
+      - "vault_data:/vault/file"
+
+  vault_agent:
+    image: hashicorp/vault:latest
+    container_name: vault_agent
+    environment:
+      VAULT_ADDR: "http://vault:8200"
+    volumes:
+      - ./vault_configs:/vault/config
+      - ./app_env:/vault/app_env 
+    command: "agent -config=/vault/config/agent-config.hcl"
+    depends_on: 
+      - vault
+
+volumes:
+  vault_data:
