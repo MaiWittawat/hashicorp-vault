@@ -46,3 +46,9 @@ vault write -f auth/approle/role/<your_role>/secret-id
 # - /vault_configs/role_id
 # - /vault_configs/secret_id
 ```
+
+### In root dir
+```
+# up all container service after you setup
+docker compose up -d --build
+```
