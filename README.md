@@ -13,8 +13,10 @@ docker exec -it vault sh # เข้าไปใน vault ก่อนเพื�
 
 ### In vault container sh
 ```
+# setup VAULT_ADDR for connect to server default is https:localhost:8200
 export VAULT_ADDR="http://localhost:8200"
 
+# login to vault server
 vault login <your_root_token>
 
 # go to your vault ui at localhost:8200
@@ -27,8 +29,10 @@ vault write auth/approle/role/<your_role> \
   token_max_ttl=4h
 
 # Create the role_id and secret id
-# Save role_id and secret_id and plase it it ./vault_configs/role_id, ./vault_configs/secret_id
+# Save role_id and secret_id and paste it it ./vault_configs/role_id, ./vault_configs/secret_id
 vault read auth/approle/role/<your-role>/role-id 
+
+# -f if your don't setting config
 vault write -f auth/approle/role/admin/secret-id
 
 # exit container
@@ -36,5 +40,6 @@ exit
 ```
 ### In root dir
 ```
+# up all container service after you setup
 docker compose up -d --build
 ```
