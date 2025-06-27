@@ -1,11 +1,10 @@
 package main
 
 import (
-	appcore_config "hashicorp-vault/config"
-	"hashicorp-vault/handler"
-	"hashicorp-vault/handler/api"
-	userSvc "hashicorp-vault/services/user"
-	"log"
+	appcore_config "hashicorp-vault/cmd/hashicorp-vault/config"
+	"hashicorp-vault/internal/handler"
+	"hashicorp-vault/internal/handler/api"
+	userSvc "hashicorp-vault/internal/services/user"
 
 	"github.com/gin-gonic/gin"
 	vault "github.com/hashicorp/vault/api"
@@ -18,23 +17,16 @@ var (
 func main() {
 	// init config
 	appcore_config.InitConfiguration()
-	config := vault.DefaultConfig()
-
-	// define variable
-	var err error
-	config.Address = appcore_config.Config.VaultAddr
-
-	// new client conenction
-	clientVault, err = vault.NewClient(config)
-	if err != nil {
-		log.Fatalf("unable to initialize Vault client: %v", err)
-	}
+	appcore_config.InitializeSecretsWithRetry()
 
 	router := gin.Default()
-	
+
 	userService := userSvc.NewUserService(appcore_config.Config, clientVault)
 	userHandler := handler.NewUserHandler(userService, appcore_config.Config, clientVault)
 	api.RegisterUserAPI(router, userHandler)
 
 	router.Run(":3033")
 }
+
+
+

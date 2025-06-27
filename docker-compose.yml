@@ -1,28 +1,39 @@
 services:
-  vault: 
+  vault:
     image: hashicorp/vault:latest
     container_name: vault
     ports:
       - "8200:8200"
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: wittawat
+    command: "server -dev -dev-listen-address='0.0.0.0:8200' -dev-root-token-id='wittawat'" # set root token 
     cap_add:
-      - IPC_LOCK # for dev we didn't use this field
-    command: "server -dev -dev-listen-address='0.0.0.0:8200' -dev-root-token-id='wittawat'"
+      - IPC_LOCK
     volumes:
-      - "vault_data:/vault/file"
+      - vault_data:/vault/file
+    
 
-  vault_agent:
+  vault-agent:
     image: hashicorp/vault:latest
-    container_name: vault_agent
-    environment:
-      VAULT_ADDR: "http://vault:8200"
+    container_name: vault-agent
     volumes:
-      - ./vault_configs:/vault/config
-      - ./app_env:/vault/app_env 
-    command: "agent -config=/vault/config/agent-config.hcl"
-    depends_on: 
-      - vault
+      - ./vault_configs/agent-config.hcl:/etc/vault-agent-config.hcl:ro # Map config file
+      - ./vault_configs/role_id:/vault/config/role_id:ro # Map role_id 
+      - ./vault_configs/secret_id:/vault/config/secret_id:ro # Map secret_id
+      - vault_agent_data:/vault/secrets # สำหรับเก็บ token ชั่วคราว
+    environment:
+      VAULT_ADDR: http://vault:8200
+    # ให้สิทธิ์ในการเขียนไฟล์กับ vault-agent ก่อนเเล้วค่อยเปลียนเป็นสิทธิ์ user ธรรมดา
+    entrypoint: /bin/sh -c "chown -R vault:vault /vault/secrets && vault agent -config=/etc/vault-agent-config.hcl"
+    user: root # รัน entrypoint ด้วย root เพื่อให้ chown ได้
+
+  go-vault-app:
+    build: .
+    container_name: go-vault-app
+    network_mode: service:vault-agent # ** สำคัญมาก เชื่อม network กับ vault-agent เพื่อให้สามารถเรียกผ่าน http://localhosst ได้
+    depends_on:
+      - vault-agent
 
 volumes:
   vault_data:
+  vault_agent_data:
