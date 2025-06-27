@@ -5,8 +5,8 @@ auto_auth {
     type = "approle"
 
     config = {
-      role_id_file_path = "/vault/config/roleid"
-      secret_id_file_path = "/vault/config/secretid" 
+      role_id_file_path = "/vault/config/role_id"
+      secret_id_file_path = "/vault/config/secret_id" 
     }
   }
 
