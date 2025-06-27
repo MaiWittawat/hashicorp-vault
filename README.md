@@ -40,11 +40,14 @@ vault write auth/approle/role/<your_role> \
 vault read auth/approle/role/<your_role>/role-id
 
 # -f if your don't setting config
-vault write -f auth/approle/role/<your_role>/secret-id 
+vault write -f auth/approle/role/<your_role>/secret-id
 
 # **paste the role-id and secret-id to 
 # - /vault_configs/role_id
 # - /vault_configs/secret_id
+
+# exit container
+exit
 ```
 
 ### In root dir
